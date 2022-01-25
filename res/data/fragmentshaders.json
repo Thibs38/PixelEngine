@@ -1,0 +1,20 @@
+[
+	{
+		         "id": 0,
+		       "name": "objectFragment",
+		       "path": "objectFragment.frag",
+		"attribcount": 3
+	},
+	{
+		         "id": 1,
+		       "name": "terrainFragment",
+		       "path": "terrainFragment.frag",
+		"attribcount": 3
+	},
+	{
+		         "id": 2,
+		       "name": "lineFragment",
+		       "path": "lineFragment.frag",
+		"attribcount": 1
+	}
+]

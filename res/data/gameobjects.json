@@ -1,0 +1,25 @@
+[
+	{
+		      "id": 0,
+		    "name": "smiley",
+		"position": {
+					"x": 0,
+					"y": 1
+					},
+		  "zIndex": 0,
+		"rotation": 45,
+		   "scale": 1
+
+	},
+	{
+		      "id": 1,
+		    "name": "heart",
+		"position": {
+					"x": 1,
+					"y": 0
+					},
+		  "zIndex": 0,
+		"rotation": -45,
+		   "scale": 1.5
+	}
+]

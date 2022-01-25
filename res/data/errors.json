@@ -1,0 +1,65 @@
+{
+	"IOErrors": [
+		{
+		"id": 0,
+		"name": "CAN'T OPEN FILE",
+		"message": "Couldn't open the file."
+		}
+	],
+
+	"JSONErrors": [
+		{
+		"id": 0,
+		"name": "CAN'T PARSE",
+		"message": "Couldn't parse the json file."
+		},
+		{
+		"id": 1,
+		"name": "MISSING MEMBER",
+		"message": "The object \"{}\" is missing the member \"{}\"."
+		},
+		{
+		"id": 2,
+		"name": "WRONG TYPE",
+		"message": "The member \"{}\" of the object \"{}\" has a wrong type. The expected type is {}."
+		},
+		{
+		"id": 3,
+		"name": "WRONG VALUE",
+		"message": "The member \"{}\" of the object \"{}\" has a wrong value. The expected value must be {}."
+		},
+		{
+		"id": 4,
+		"name": "WRONG ROOT",
+		"message": "The root of the file must be an {}."
+		}
+	],
+
+	"ShaderErrors": [
+		{
+		"id": 0,
+		"name": "CAN'T COMPILE VERTEX",
+		"message": "Couldn't compile the vertex shader."
+		},
+		{
+		"id": 1,
+		"name": "CAN'T COMPILE FRAGMENT",
+		"message": "Couldn't compile the fragment shader."
+		},
+		{
+		"id": 2,
+		"name": "CAN'T COMPILE GEOMETRY",
+		"message": "Couldn't compile the geometry shader."
+		},
+		{
+		"id": 3,
+		"name": "CAN'T COMPILE COMPUTE",
+		"message": "Couldn't compile the compute shader."
+		},
+		{
+		"id": 4,
+		"name": "CAN'T LINK",
+		"message": "Couldn't link the shaders: {} {} {}."
+		}
+	]
+}

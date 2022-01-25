@@ -1,0 +1,20 @@
+[
+	{
+		            "id": 0,
+		          "name": "objectVertex",
+		          "path": "objectVertex.vert",
+		"attribcount": 3
+	},
+	{
+		            "id": 1,
+		          "name": "terrainVertex",
+		          "path": "terrainVertex.vert",
+		"attribcount": 3
+	},
+	{
+		            "id": 2,
+		          "name": "lineVertex",
+		          "path": "lineVertex.vert",
+		"attribcount": 1
+	}
+]

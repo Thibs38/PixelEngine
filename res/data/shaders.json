@@ -1,0 +1,26 @@
+[
+	{
+		            "id": 0,
+		          "name": "entityShader",
+		        "vertex": 0,
+		      "geometry": -1,
+		      "fragment": 0,
+		   "attribcount": 3
+	},
+	{
+		            "id": 1,
+		          "name": "terrainShader",
+		        "vertex": 1,
+		      "geometry": -1,
+		      "fragment": 1,
+		   "attribcount": 3
+	},
+	{
+		            "id": 2,
+		          "name": "lineShader",
+		        "vertex": 2,
+		      "geometry": -1,
+		      "fragment": 2,
+		   "attribcount": 1
+	}
+]
