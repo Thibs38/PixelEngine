@@ -55,53 +55,74 @@ using CompareFunction = bool(*)(T...);
 //The Comparators
 
 template<typename ...T>
-struct Comparator
+struct IComparator
 {
-	const CompareFunction<T...> compare;
-	const std::string message;
+	static virtual const bool compare(T...) = 0;
+	static virtual const std::string prinMessage() = 0;
+};
 
-	Comparator(const CompareFunction<T...> compare, const std::string message):
-		compare(compare), message(message){	}
+template<typename ...T>
+struct Equal : Comparator {
+
+	static const bool compare(T a, T b) const override { return a == b; }
+	static const std::string printMessage() const override { return "equal to {}"; }
 
 };
 
-template<typename T>
-bool equal(T a, T b) { return a == b; }
-template<typename T>
-bool notEqual(T a, T b) { return a != b; }
-template<typename T>
-bool lessThan(T a, T b) { return a < b; }
-template<typename T>
-bool lessEqualThan(T a, T b) { return a <= b; }
-template<typename T>
-bool greaterThan(T a, T b) { return a > b; }
-template<typename T>
-bool greaterEqualThan(T a, T b) { return a >= b; }
+template<typename ...T>
+struct NotEqual : Comparator {
 
-template<typename T>
-bool inRangeInclusive(T a, T b, T c) { return a >= b && a <= c; }
-template<typename T>
-bool inRangeExclusive(T a, T b, T c) { return a > b && a < c; }
+	static const bool compare(T a, T b) const override { return a != b; }
+	static const std::string printMessage() const override { return "not equal to {}"; }
 
+};
 
-template<typename T>
-extern const Comparator<T, T> equal{ &equals<T>, "equal to {}" };
-template<typename T>
-extern const Comparator<T, T> notEqual{ &differentThan, "different than {}" };
-template<typename T>
-extern const Comparator<T, T> lessThan{ &lessThan, "less than {}" };
-template<typename T>
-extern const Comparator<T, T> lessEqualThan{ &lessEqualThan, "less or equal than {}" };
-template<typename T>
-extern const Comparator<T, T> greaterThan{ &greaterThan<T>, "greater than {}" };
-template<typename T>
-extern const Comparator<T, T> greaterEqualThan{ &greaterEqualThan<T>, "greater or equal than {}" };
+template<typename ...T>
+struct LessThan : Comparator {
 
-template<typename T>
-extern const Comparator<T, T, T> inRangeInclusive{ &inRangeInclusive, "in the range [{}, ]" };
-template<typename T>
-extern const Comparator<T, T, T> inRangeExclusive{ &inRangeExclusive, "in the range ]{}, [" };
+	static const bool compare(T a, T b) const override { return a < b; }
+	static const std::string printMessage() const override { return "less than {}"; }
 
+};
 
+template<typename ...T>
+struct LessEqualThan : Comparator {
+
+	static const bool compare(T a, T b) const override { return a <= b; }
+	static const std::string printMessage() const override { return "less or equal to {}"; }
+
+};
+
+template<typename ...T>
+struct GreaterThan : Comparator {
+
+	static const bool compare(T a, T b) const override { return a > b; }
+	static const std::string printMessage() const override { return "greater than {}"; }
+
+};
+
+template<typename ...T>
+struct GreaterEqualThan : Comparator {
+
+	static const bool compare(T a, T b) const override { return a >= b; }
+	static const std::string printMessage() const override { return "greater or equal to {}"; }
+
+};
+
+template<typename ...T>
+struct InRangeInclusive : Comparator {
+
+	static const bool compare(T a, T b, T c) const override { return a >= b && a <= c; }
+	static const std::string printMessage() const override { return "in the range [{}, {}]"; }
+
+};
+
+template<typename ...T>
+struct InRangeExclusive : Comparator {
+
+	static const bool compare(T a, T b, T c) const override { return a > b && a < c; }
+	static const std::string printMessage() const override { return "in the range ]{}, {}["; }
+
+};
 
 
