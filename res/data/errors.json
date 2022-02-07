@@ -26,7 +26,7 @@
 		{
 		"id": 3,
 		"name": "WRONG VALUE",
-		"message": "The member \"{}\" of the object \"{}\" has a wrong value. The expected value must be {}."
+		"message": "The member \"{}\" of the object \"{}\" has a wrong value. The expected value must {}."
 		},
 		{
 		"id": 4,

@@ -49,7 +49,7 @@ bool errorParsingJSON(rapidjson::Document& doc, constring data, constring path, 
 		size_t const line = 1 + std::count_if(
 			data.cbegin(),
 			error_it,
-			std::bind2nd(std::equal_to<char>(), '\n'));
+			std::bind(std::equal_to<char>(), '\n'));
 
 		// Compute column (char offset into line), using 1 as base column
 		std::string::const_reverse_iterator reverse_error_it{ error_it };
@@ -75,6 +75,8 @@ bool errorParsingJSON(rapidjson::Document& doc, constring data, constring path, 
 template<class T>
 inline std::string defaultValueFormat(T defaultValue) { return fmt::format("{} will be used as a default value", defaultValue);  }
 
+//TODO Rewrite documentation for the next 3 functions
+
 /// <summary>
 /// Detects if the value exists, if it is a float and if it is in the correct range.
 /// </summary>
@@ -89,8 +91,8 @@ inline std::string defaultValueFormat(T defaultValue) { return fmt::format("{} w
 /// <param name="comparator">The comparator used for the range of the value.</param>
 /// <param name="...comparands">The comparands used by the comparator.</param>
 /// <returns>The value if no errors, the default value otherwise.</returns>
-template<class ...T, class ...U>
-float errorParsingJSONFloat(const rapidjson::Value& value, const char* object, const char* member, int index, constring path, float defaultValue, const Comparator<T...>& comparator, U... comparands)
+template<class ...T>
+auto errorParsingJSONFloat (const rapidjson::Value& value, const char* object, const char* member, int index, constring path, const IComparator<T...>& comparator = Always<T...>(), float defaultValue = 0)
 {
 	if (!value.HasMember(member))
 	{
@@ -98,28 +100,26 @@ float errorParsingJSONFloat(const rapidjson::Value& value, const char* object, c
 			formatJSONErrorArray(object, index), member);
 		return defaultValue;
 	}
-	else
+
+	bool isFloat = value[member].IsFloat();
+	bool isInt = value[member].IsInt();
+	if (!isFloat && !isInt)
 	{
-		bool isFloat = value[member].IsFloat();
-		bool isInt = value[member].IsInt();
-		if (!isFloat && !isInt)
-		{
-			ErrorManager::printJSONError(JSONError::WRONG_TYPE, path, defaultValueFormat(defaultValue),
-				formatJSONErrorArray(object, index), member, float_s);
-			return defaultValue;
-		}
-		else
-		{
-			float v = isFloat? value[member].GetFloat() : value[member].GetInt();
-			if (!comparator.compareFunction(v, comparands...))
-			{
-				ErrorManager::printJSONError(JSONError::WRONG_VALUE, path, defaultValueFormat(defaultValue),
-					formatJSONErrorArray(object, index), member, fmt::format(comparator.message, comparands...));
-				return defaultValue;
-			}
-			return value[member].GetFloat();
-		}
+		ErrorManager::printJSONError(JSONError::WRONG_TYPE, path, defaultValueFormat(defaultValue),
+			formatJSONErrorArray(object, index), member, float_s);
+		return defaultValue;
 	}
+	
+	float v = isFloat? value[member].GetFloat() : value[member].GetInt();
+	if (!comparator.compare(v))
+	{
+		ErrorManager::printJSONError(JSONError::WRONG_VALUE, path, defaultValueFormat(defaultValue),
+			formatJSONErrorArray(object, index), member, comparator.printMessage());
+		return defaultValue;
+	}
+	return value[member].GetFloat();
+	
+	
 }
 
 /// <summary>
@@ -136,8 +136,8 @@ float errorParsingJSONFloat(const rapidjson::Value& value, const char* object, c
 /// <param name="comparator">The comparator used for the range of the value.</param>
 /// <param name="...comparands">The comparands used by the comparator.</param>
 /// <returns>The value if no errors, the default value otherwise.</returns>
-template<class ...T, class ...U>
-int errorParsingJSONInt(const rapidjson::Value& value, const char* object, const char* member, int index, constring path, int defaultValue, const Comparator<T...>& comparator, U... comparands)
+template<class ...T>
+auto errorParsingJSONInt   (const rapidjson::Value& value, const char* object, const char* member, int index, constring path, const IComparator<T...>& comparator = Always<T...>(), int defaultValue = 0)
 {
 	if (!value.HasMember(member))
 	{
@@ -145,24 +145,27 @@ int errorParsingJSONInt(const rapidjson::Value& value, const char* object, const
 			formatJSONErrorArray(object, index), member);
 		return defaultValue;
 	}
-	else if (!value[member].IsInt())
+
+	if (!value[member].IsInt())
 	{
 		ErrorManager::printJSONError(JSONError::WRONG_TYPE, path, defaultValueFormat(defaultValue),
 			formatJSONErrorArray(object, index), member, int_s);
 		return defaultValue;
 	}
-	else
+
+	int v = value[member].GetInt();
+	if (!comparator.compare(v))
 	{
-		float v = value[member].GetInt();
-		if (!comparator.compareFunction(v, comparands...))
-		{
-			ErrorManager::printJSONError(JSONError::WRONG_VALUE, path, defaultValueFormat(defaultValue),
-				formatJSONErrorArray(object, index), member, fmt::format(comparator.message, comparands...)); //SAFE Be careful here
-			return defaultValue;
-		}
-		return v;
+		ErrorManager::printJSONError(JSONError::WRONG_VALUE, path, defaultValueFormat(defaultValue),
+			formatJSONErrorArray(object, index), member, comparator.printMessage());
+		return defaultValue;
 	}
+	return v;
+	
 }
+
+//SAFE Add String comparison to function and then to each file loaded
+//TODO Change IDs by name in JSON and then generate an ID (long)
 
 /// <summary>
 /// Detects if the value exists and if it is a string.
@@ -173,20 +176,23 @@ int errorParsingJSONInt(const rapidjson::Value& value, const char* object, const
 /// <param name="index">The index of the current object.</param>
 /// <param name="path">The path of the file.</param>
 /// <returns>The value if no errors, "ERROR" otherwise.</returns>
-std::string errorParsingJSONString(const rapidjson::Value& value, const char* object, const char* member, int index, constring path)
+template<class ...T>
+auto errorParsingJSONString(const rapidjson::Value& value, const char* object, const char* member, int index, constring path, const IComparator<T...>& comparator = Always<T...>(), const std::string &defaultValue = "ERROR")
 {
 	if (!value.HasMember(member))
 	{
-		ErrorManager::printJSONError(JSONError::MISSING_MEMBER, path, "ERROR will be used as a default value",
+		ErrorManager::printJSONError(JSONError::MISSING_MEMBER, path, defaultValueFormat(defaultValue),
 			formatJSONErrorArray(object, index), member);
-		return error_s;
+		return defaultValue;
 	}
-	else if (!value[member].IsString())
+
+	if (!value[member].IsString())
 	{
-		ErrorManager::printJSONError(JSONError::WRONG_TYPE, path, "ERROR will be used as a default value",
+		ErrorManager::printJSONError(JSONError::WRONG_TYPE, path, defaultValueFormat(defaultValue),
 			formatJSONErrorArray(object, index), member, int_s);
-		return error_s;
+		return defaultValue;
 	}
+
 	return value[member].GetString();
 }
 
@@ -324,10 +330,9 @@ void readVertexShaders()
 		std::string name;
 		std::string fileName; //SAFE must finish by .vert
 
-		const rapidjson::Value& value = doc[i];
-
-		id = errorParsingJSONInt(value, vertex_s, id_s, i, path, i, greaterEqualThanI, 0);
-
+		const rapidjson::Value& value = doc[i]; 
+		
+		id = errorParsingJSONInt(value, vertex_s, id_s, i, path, GreaterEqualThan{ 0 }, i);
 		name = errorParsingJSONString(value, vertex_s, name_s, i, path);
 
 		fileName = errorParsingJSONString(value, vertex_s, path_s, i, path);
@@ -371,7 +376,7 @@ void readGeometryShaders()
 
 		const rapidjson::Value& value = doc[i];
 
-		id = errorParsingJSONInt(value, geometry_s, id_s, i, path, i, greaterEqualThanI, 0);
+		id = errorParsingJSONInt(value, geometry_s, id_s, i, path, GreaterEqualThan{ 0 }, i);
 
 		name = errorParsingJSONString(value, geometry_s, name_s, i, path);
 
@@ -414,7 +419,7 @@ void readFragmentShaders()
 
 		const rapidjson::Value& value = doc[i];
 
-		id = errorParsingJSONInt(value, fragment_s, id_s, i, path, i, greaterEqualThanI, 0);
+		id = errorParsingJSONInt(value, fragment_s, id_s, i, path, GreaterEqualThan{ 0 }, i);
 
 		name = errorParsingJSONString(value, fragment_s, name_s, i, path);
 
@@ -468,15 +473,15 @@ void readShaders()
 
 		const rapidjson::Value& value = doc[i];
 
-		id = errorParsingJSONInt(value, shader_s, id_s, i, path, i, greaterEqualThanI, 0);
+		id = errorParsingJSONInt(value, shader_s, id_s, i, path, GreaterEqualThan{ 0 }, i);
 
 		name = errorParsingJSONString(value, shader_s, name_s, i, path);
 
-		vertexID = errorParsingJSONInt(value, shader_s, vertex_s, i, path, -1, greaterEqualThanI, 0);
+		vertexID = errorParsingJSONInt(value, shader_s, vertex_s, i, path, GreaterEqualThan{ 0 }, -1);
 
-		geometryID = errorParsingJSONInt(value, shader_s, geometry_s, i, path, -1, greaterEqualThanI, -1);
+		geometryID = errorParsingJSONInt(value, shader_s, geometry_s, i, path, GreaterEqualThan{ -1 }, -1);
 
-		fragmentID = errorParsingJSONInt(value, shader_s, fragment_s, i, path, -1, greaterEqualThanI, 0);
+		fragmentID = errorParsingJSONInt(value, shader_s, fragment_s, i, path, GreaterEqualThan{ 0 }, -1);
 
 		//TODO Display message saying that one or two are missing
 		if (vertexID == -1 || fragmentID == -1) continue; //We skip the shader if vertex or fragment is missing
@@ -544,13 +549,12 @@ void readRenderers()
 
 		const rapidjson::Value& value = doc[i];
 
-		id = errorParsingJSONInt(value, texture_s, id_s, i, path, i, greaterEqualThanI, 0);
+		id = errorParsingJSONInt(value, texture_s, id_s, i, path, GreaterEqualThan{ 0 }, i);
 
 		name = errorParsingJSONString(value, texture_s, name_s, i, path);
 
-		fileName = errorParsingJSONString(value, texture_s, path_s, i, path);
+		//fileName = errorParsingJSONString(value, texture_s, path_s, i, path);
 
-		new 
 	}
 
 	printf("Loaded %d textures\n", (int)Texture::textures.size());
@@ -582,7 +586,7 @@ void readTextures()
 
 		const rapidjson::Value& value = doc[i];
 
-		id = errorParsingJSONInt(value, texture_s, id_s, i, path, i, greaterEqualThanI, 0);
+		id = errorParsingJSONInt(value, texture_s, id_s, i, path, GreaterEqualThan{ 0 }, i);
 
 		name = errorParsingJSONString(value, texture_s, name_s, i, path);
 
@@ -616,11 +620,11 @@ void readMaterials()
 
 		const rapidjson::Value& mat = doc[i];
 
-		id = errorParsingJSONInt(mat, material_s, id_s, i, path, i, greaterEqualThanI, 0);
+		id = errorParsingJSONInt(mat, material_s, id_s, i, path, GreaterEqualThan{ 0 }, i);
 
 		name = errorParsingJSONString(mat, material_s, name_s, i, path);
 
-		shaderID = errorParsingJSONInt(mat, material_s, shader_s, i, path, 0,greaterEqualThanI,0);
+		shaderID = errorParsingJSONInt(mat, material_s, shader_s, i, path, GreaterEqualThan{ 0 }, 0);
 
 		new Material(id, name, Shader::shaders[shaderID]);
 	}
@@ -653,19 +657,19 @@ void readGameObjects()
 
 		const rapidjson::Value& value = doc[i];
 
-		id = errorParsingJSONInt(value, finalmodel_s, id_s, i, path, i, greaterEqualThan, 0);
+		id = errorParsingJSONInt(value, finalmodel_s, id_s, i, path, GreaterEqualThan{ 0 }, i);
 
 		name = errorParsingJSONString(value, finalmodel_s, name_s, i, path);
 
-		posX = errorParsingJSONFloat(value, finalmodel_s, rawmodel_s, i, path, 0, greaterEqualThan, 0);
+		posX = errorParsingJSONFloat(value, finalmodel_s, rawmodel_s, i, path, GreaterEqualThan{ 0 }, 0);
 
-		texture = errorParsingJSONInt(value, finalmodel_s, texture_s, i, path, 0, greaterEqualThan, 0);
+		//texture = errorParsingJSONInt(value, finalmodel_s, texture_s, i, path, 0, GreaterEqualThan{ 0 });
 
-		material = errorParsingJSONInt(value, finalmodel_s, material_s, i, path, 0, greaterEqualThan, 0);
+		//material = errorParsingJSONInt(value, finalmodel_s, material_s, i, path, 0, GreaterEqualThan{ 0 });
 
 		GameObject* gameObject = new GameObject(id, name);
 		Transform transform = gameObject->transform;
-		transform.position
+		//transform.position
 	}
 	printf("Loaded %d GameObjects\n", (int)GameObject::gameobjects.size());
 }
