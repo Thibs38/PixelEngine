@@ -111,7 +111,7 @@ float errorParsingJSONFloat(const rapidjson::Value& value, const char* object, c
 		else
 		{
 			float v = isFloat? value[member].GetFloat() : value[member].GetInt();
-			if (!comparator.compare(v, comparands...))
+			if (!comparator.compareFunction(v, comparands...))
 			{
 				ErrorManager::printJSONError(JSONError::WRONG_VALUE, path, defaultValueFormat(defaultValue),
 					formatJSONErrorArray(object, index), member, fmt::format(comparator.message, comparands...));
@@ -154,7 +154,7 @@ int errorParsingJSONInt(const rapidjson::Value& value, const char* object, const
 	else
 	{
 		float v = value[member].GetInt();
-		if (!comparator.compare(v, comparands...))
+		if (!comparator.compareFunction(v, comparands...))
 		{
 			ErrorManager::printJSONError(JSONError::WRONG_VALUE, path, defaultValueFormat(defaultValue),
 				formatJSONErrorArray(object, index), member, fmt::format(comparator.message, comparands...)); //SAFE Be careful here
@@ -326,7 +326,7 @@ void readVertexShaders()
 
 		const rapidjson::Value& value = doc[i];
 
-		id = errorParsingJSONInt(value, vertex_s, id_s, i, path, i, greaterEqualThan<int>, 0);
+		id = errorParsingJSONInt(value, vertex_s, id_s, i, path, i, greaterEqualThanI, 0);
 
 		name = errorParsingJSONString(value, vertex_s, name_s, i, path);
 
@@ -371,7 +371,7 @@ void readGeometryShaders()
 
 		const rapidjson::Value& value = doc[i];
 
-		id = errorParsingJSONInt(value, geometry_s, id_s, i, path, i, greaterEqualThan<int>, 0);
+		id = errorParsingJSONInt(value, geometry_s, id_s, i, path, i, greaterEqualThanI, 0);
 
 		name = errorParsingJSONString(value, geometry_s, name_s, i, path);
 
@@ -414,7 +414,7 @@ void readFragmentShaders()
 
 		const rapidjson::Value& value = doc[i];
 
-		id = errorParsingJSONInt(value, fragment_s, id_s, i, path, i, greaterEqualThan<int>, 0);
+		id = errorParsingJSONInt(value, fragment_s, id_s, i, path, i, greaterEqualThanI, 0);
 
 		name = errorParsingJSONString(value, fragment_s, name_s, i, path);
 
@@ -468,15 +468,15 @@ void readShaders()
 
 		const rapidjson::Value& value = doc[i];
 
-		id = errorParsingJSONInt(value, shader_s, id_s, i, path, i, greaterEqualThan<int>, 0);
+		id = errorParsingJSONInt(value, shader_s, id_s, i, path, i, greaterEqualThanI, 0);
 
 		name = errorParsingJSONString(value, shader_s, name_s, i, path);
 
-		vertexID = errorParsingJSONInt(value, shader_s, vertex_s, i, path, -1, greaterEqualThan<int>, 0);
+		vertexID = errorParsingJSONInt(value, shader_s, vertex_s, i, path, -1, greaterEqualThanI, 0);
 
-		geometryID = errorParsingJSONInt(value, shader_s, geometry_s, i, path, -1, greaterEqualThan<int>, -1);
+		geometryID = errorParsingJSONInt(value, shader_s, geometry_s, i, path, -1, greaterEqualThanI, -1);
 
-		fragmentID = errorParsingJSONInt(value, shader_s, fragment_s, i, path, -1, greaterEqualThan<int>, 0);
+		fragmentID = errorParsingJSONInt(value, shader_s, fragment_s, i, path, -1, greaterEqualThanI, 0);
 
 		//TODO Display message saying that one or two are missing
 		if (vertexID == -1 || fragmentID == -1) continue; //We skip the shader if vertex or fragment is missing

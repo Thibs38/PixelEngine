@@ -33,8 +33,8 @@ bool inRangeExclusive(float a, float b, float c) { return a > b && a < c; }
 bool inRangeExclusive(int a, int b, int c) { return a > b && a < c; }
 
 template<class ...T>
-Comparator<T...>::Comparator(const CompareFunction<T...> compare, const std::string message): 
-	compare(compare), message(message){}
+Comparator<T...>::Comparator(const CompareFunction<T...> compareFunction, const std::string message): 
+	compareFunction(compareFunction), message(message){}
 
 
 
