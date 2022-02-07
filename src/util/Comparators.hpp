@@ -11,10 +11,10 @@ using CompareFunction = bool(*)(T...);
 template<typename ...T>
 struct Comparator
 {
-	const CompareFunction<T...> compareFunction;
+	const CompareFunction<T...> compare;
 	const std::string message;
 
-	Comparator(const CompareFunction<T...> compareFunction, const std::string message);
+	Comparator(const CompareFunction<T...> compare, const std::string message);
 };
 
 template<typename T>
@@ -50,18 +50,19 @@ extern const Comparator<float, float, float> inRangeExclusiveF;
 template<class ...T>
 using CompareFunction = bool(*)(T...);
 
-//OPTI Can maybe be optimized by including the value to compare inside of the Comparator (thus not having to pass the value as a paramater of the caller)
-
 //FIXME Fix the comparators
+
+//The Comparators
 
 template<typename ...T>
 struct Comparator
 {
-	const CompareFunction<T...> compareFunction;
+	const CompareFunction<T...> compare;
 	const std::string message;
 
-	Comparator(const CompareFunction<T...> compareFunction, const std::string message):
-		compareFunction(compareFunction), message(message){ }
+	Comparator(const CompareFunction<T...> compare, const std::string message):
+		compare(compare), message(message){	}
+
 };
 
 template<typename T>
@@ -84,7 +85,7 @@ bool inRangeExclusive(T a, T b, T c) { return a > b && a < c; }
 
 
 template<typename T>
-extern const Comparator<T, T> equal{ &equals, "equal to {}" };
+extern const Comparator<T, T> equal{ &equals<T>, "equal to {}" };
 template<typename T>
 extern const Comparator<T, T> notEqual{ &differentThan, "different than {}" };
 template<typename T>
@@ -92,9 +93,9 @@ extern const Comparator<T, T> lessThan{ &lessThan, "less than {}" };
 template<typename T>
 extern const Comparator<T, T> lessEqualThan{ &lessEqualThan, "less or equal than {}" };
 template<typename T>
-extern const Comparator<T, T> greaterThan{ &greaterThan, "greater than {}" };
+extern const Comparator<T, T> greaterThan{ &greaterThan<T>, "greater than {}" };
 template<typename T>
-extern const Comparator<T, T> greaterEqualThan{ &greaterEqualThan, "greater or equal than {}" };
+extern const Comparator<T, T> greaterEqualThan{ &greaterEqualThan<T>, "greater or equal than {}" };
 
 template<typename T>
 extern const Comparator<T, T, T> inRangeInclusive{ &inRangeInclusive, "in the range [{}, ]" };

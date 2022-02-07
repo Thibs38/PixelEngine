@@ -26,7 +26,7 @@ void Loader::init() //SAFE Add program exit on fatal errors
 	readShaders();					 //Loads all the shaders
 	//WrenManager::init();           <//Loads all the wren scripts
 
-	printf("Loading completed\n"); //TODO Mettre en vert
+	printf("Loading completed\n"); //TODO Green text
 }
 
 void Loader::destroy() //TODO Add model, textures, rawmodels, material and shader destroy

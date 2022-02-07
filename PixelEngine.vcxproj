@@ -75,6 +75,7 @@
     <IncludePath>.\include;.\src;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <LibraryPath>.\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
     <SourcePath>.\src;$(VC_SourcePath);</SourcePath>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -91,10 +92,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <OutputFile> $(OutDir)$(TargetName)$(TargetExt)</OutputFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -142,6 +145,52 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\io\Error.cpp" />
+    <ClCompile Include="src\io\FileIO.cpp" />
+    <ClCompile Include="src\io\JSON.cpp" />
+    <ClCompile Include="src\io\WREN.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\rendering\Loader.cpp" />
+    <ClCompile Include="src\rendering\Model.cpp" />
+    <ClCompile Include="src\rendering\Shader.cpp" />
+    <ClCompile Include="src\util\Color.cpp" />
+    <ClCompile Include="src\util\Comparators.cpp" />
+    <ClCompile Include="src\util\lib\glad.c" />
+    <ClCompile Include="src\util\lib\stb_image.cpp" />
+    <ClCompile Include="src\util\Octree.cpp" />
+    <ClCompile Include="src\util\wren\wren_compiler.c" />
+    <ClCompile Include="src\util\wren\wren_core.c" />
+    <ClCompile Include="src\util\wren\wren_debug.c" />
+    <ClCompile Include="src\util\wren\wren_primitive.c" />
+    <ClCompile Include="src\util\wren\wren_utils.c" />
+    <ClCompile Include="src\util\wren\wren_value.c" />
+    <ClCompile Include="src\util\wren\wren_vm.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\io\Error.hpp" />
+    <ClInclude Include="src\io\FileIO.hpp" />
+    <ClInclude Include="src\io\JSON.hpp" />
+    <ClInclude Include="src\io\WREN.hpp" />
+    <ClInclude Include="src\rendering\Loader.hpp" />
+    <ClInclude Include="src\rendering\Model.hpp" />
+    <ClInclude Include="src\rendering\Shader.hpp" />
+    <ClInclude Include="src\util\Color.hpp" />
+    <ClInclude Include="src\util\Comparators.hpp" />
+    <ClInclude Include="src\util\Octree.hpp" />
+    <ClInclude Include="src\util\Utility.hpp" />
+    <ClInclude Include="src\util\wren\wren_common.h" />
+    <ClInclude Include="src\util\wren\wren_compiler.h" />
+    <ClInclude Include="src\util\wren\wren_core.h" />
+    <ClInclude Include="src\util\wren\wren_debug.h" />
+    <ClInclude Include="src\util\wren\wren_math.h" />
+    <ClInclude Include="src\util\wren\wren_opcodes.h" />
+    <ClInclude Include="src\util\wren\wren_primitive.h" />
+    <ClInclude Include="src\util\wren\wren_utils.h" />
+    <ClInclude Include="src\util\wren\wren_value.h" />
+    <ClInclude Include="src\util\wren\wren_vm.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\util\wren\wren_core.wren.inc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
