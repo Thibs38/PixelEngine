@@ -26,58 +26,11 @@ using namespace naming;
 /// <returns>C-style string with the error</returns>
 inline std::string formatJSONErrorArray(const std::string& arraysName, int n){ return fmt::format("{}[{:d}]", arraysName, n).c_str(); }
 
-/// <summary>
-/// Tests if there were errors while parsing the JSON file and print them in the console
-/// </summary>
-/// <param name="doc">The document where the parse was done</param>
-/// <param name="data">The parsed string</param>
-/// <param name="path">The path to the document</param>
-/// <param name="printError">Print errors to the console?</param>
-/// <returns>True if errors, False otherwise</returns>
-bool errorParsingJSON(rapidjson::Document& doc, constring data, constring path, bool printError = true)
-{
-	bool error = doc.HasParseError();
-	if (error)
-	{
-		// rapidjson does not provide line/column, only character offset
-		//hacking it here until (if) rapidjson implements it
-		size_t const error_char_offset = doc.GetErrorOffset();
-		std::string::const_iterator error_it =
-			data.cbegin() + error_char_offset;
-
-		// Compute line number, using 1 as base line
-		size_t const line = 1 + std::count_if(
-			data.cbegin(),
-			error_it,
-			std::bind(std::equal_to<char>(), '\n'));
-
-		// Compute column (char offset into line), using 1 as base column
-		std::string::const_reverse_iterator reverse_error_it{ error_it };
-		auto error_line_begin_it = std::find(
-			reverse_error_it,
-			data.crend(),
-			'\n');
-
-		// If this is the first line we can
-		size_t const column =
-			error_line_begin_it != data.crend()
-			? std::distance(reverse_error_it, error_line_begin_it) + 1
-			: error_char_offset + 1;
-
-		if (printError)
-			ErrorManager::printJSONErrorLine(JSONError::CANT_PARSE, path, rapidjson::GetParseError_En(doc.GetParseError()), line, column);
-		else
-			ErrorManager::printError("JSONError", "CAN'T PARSE", path, "Couldn't parse the file", rapidjson::GetParseError_En(doc.GetParseError()), line, column);
-	}
-	return error;
-}
 
 template<class T>
 inline std::string defaultValueFormat(T defaultValue) { return fmt::format("{} will be used as a default value", defaultValue);  }
 
-//TODO Rewrite documentation for the next 4 functions and change there names
-
-float 
+//TODO Rewrite documentation for the next 3 functions and change there names
 
 /// <summary>
 /// Detects if the value exists, if it is a float and if it is in the correct range.
@@ -93,8 +46,8 @@ float
 /// <param name="comparator">The comparator used for the range of the value.</param>
 /// <param name="...comparands">The comparands used by the comparator.</param>
 /// <returns>The value if no errors, the default value otherwise.</returns>
-template<class T>
-float errorParsingJSONFloat (const rapidjson::Value& value, const char* object, const char* member, int index, constring path, const IComparator<T>& comparator = Always<T>(), float defaultValue = 0)
+template<class T = float>
+float parseJSONFloat (const rapidjson::Value& value, const char* object, const char* member, int index, constring path, const IComparator<T>& comparator = Always<T>(), float defaultValue = 0)
 {
 	if (!value.HasMember(member))
 	{
@@ -138,8 +91,8 @@ float errorParsingJSONFloat (const rapidjson::Value& value, const char* object, 
 /// <param name="comparator">The comparator used for the range of the value.</param>
 /// <param name="...comparands">The comparands used by the comparator.</param>
 /// <returns>The value if no errors, the default value otherwise.</returns>
-template<class T>
-int errorParsingJSONInt   (const rapidjson::Value& value, const char* object, const char* member, int index, constring path, const IComparator<T>& comparator = Always<T>(), int defaultValue = 0)
+template<class T = int>
+int parseJSONInt   (const rapidjson::Value& value, const char* object, const char* member, int index, constring path, const IComparator<T>& comparator = Always<T>(), int defaultValue = 0)
 {
 	if (!value.HasMember(member))
 	{
@@ -166,7 +119,6 @@ int errorParsingJSONInt   (const rapidjson::Value& value, const char* object, co
 	
 }
 
-//SAFE Add String comparison to function and then to each file loaded
 //TODO Change IDs by name in JSON and then generate an ID (long)
 
 /// <summary>
@@ -178,8 +130,8 @@ int errorParsingJSONInt   (const rapidjson::Value& value, const char* object, co
 /// <param name="index">The index of the current object.</param>
 /// <param name="path">The path of the file.</param>
 /// <returns>The value if no errors, "ERROR" otherwise.</returns>
-template <typename T>
-std::string errorParsingJSONString(const rapidjson::Value& value, const char* object, const char* member, int index, constring path, const IComparator<std::string>& comparator = Always<T>(), const std::string &defaultValue = "ERROR")
+template <typename T = std::string>
+std::string parseJSONString(const rapidjson::Value& value, const char* object, const char* member, int index, constring path, const IComparator<T>& comparator = Always<T>(), const std::string &defaultValue = "ERROR")
 {
 	if (!value.HasMember(member))
 	{
@@ -207,6 +159,8 @@ std::string errorParsingJSONString(const rapidjson::Value& value, const char* ob
 
 #pragma endregion
 
+//TODO Change printError name (ambiguity)
+
 /// <summary>
 /// Parses the file at the given path to the given document. Prints any errors in the console.
 /// </summary>
@@ -223,7 +177,40 @@ bool parseJSON(rapidjson::Document& doc, constring path, bool printError = true)
 	std::string json;
 	readFile(file, json);                               //Read the bytes from the file
 	doc.Parse(json.c_str());                            //Parsing the file
-	return !errorParsingJSON(doc, json, path, printError);
+	bool error = doc.HasParseError();
+	if (error)
+	{
+		// rapidjson does not provide line/column, only character offset
+		//hacking it here until (if) rapidjson implements it
+		size_t const error_char_offset = doc.GetErrorOffset();
+		std::string::const_iterator error_it =
+			json.cbegin() + error_char_offset;
+
+		// Compute line number, using 1 as base line
+		size_t const line = 1 + std::count_if(
+			json.cbegin(),
+			error_it,
+			std::bind(std::equal_to<char>(), '\n'));
+
+		// Compute column (char offset into line), using 1 as base column
+		std::string::const_reverse_iterator reverse_error_it{ error_it };
+		auto error_line_begin_it = std::find(
+			reverse_error_it,
+			json.crend(),
+			'\n');
+
+		// If this is the first line we can
+		size_t const column =
+			error_line_begin_it != json.crend()
+			? std::distance(reverse_error_it, error_line_begin_it) + 1
+			: error_char_offset + 1;
+
+		if (printError)
+			ErrorManager::printJSONErrorLine(JSONError::CANT_PARSE, path, rapidjson::GetParseError_En(doc.GetParseError()), line, column);
+		else
+			ErrorManager::printError("JSONError", "CAN'T PARSE", path, "Couldn't parse the file", rapidjson::GetParseError_En(doc.GetParseError()), line, column);
+	}
+	return error;
 }
 
 #pragma region Shaders
@@ -337,14 +324,14 @@ void readVertexShaders()
 	{
 		int id;
 		std::string name;
-		std::string fileName; //SAFE must finish by .vert
+		std::string fileName;
 
 		const rapidjson::Value& value = doc[i]; 
 		
-		id = errorParsingJSONInt(value, vertex_s, id_s, i, path, GreaterEqualThan{ 0 }, i);
-		name = errorParsingJSONString(value, vertex_s, name_s, i, path);
+		name = parseJSONString(value, vertex_s, name_s, i, path);
 
-		fileName = errorParsingJSONString(value, vertex_s, path_s, i, path);
+		if(EndsWith{ ".vert" }.compare)
+		fileName = parseJSONString(value, vertex_s, path_s, i, path);
 
 		std::string shaderCode;
 
@@ -354,7 +341,7 @@ void readVertexShaders()
 
 		if (vertexShader > 0) //Error management done in loadShader()
 		{
-			new VertexShader(id, name, vertexShader);
+			new VertexShader(id, name, vertexShader); //Adds to the static list of VertexShader
 		}
 	}
 
@@ -385,11 +372,11 @@ void readGeometryShaders()
 
 		const rapidjson::Value& value = doc[i];
 
-		id = errorParsingJSONInt(value, geometry_s, id_s, i, path, GreaterEqualThan{ 0 }, i);
+		id = parseJSONInt(value, geometry_s, id_s, i, path, GreaterEqualThan{ 0 }, i);
 
-		name = errorParsingJSONString(value, geometry_s, name_s, i, path);
+		name = parseJSONString(value, geometry_s, name_s, i, path);
 
-		fileName = errorParsingJSONString(value, geometry_s, path_s, i, path);
+		fileName = parseJSONString(value, geometry_s, path_s, i, path);
 
 		std::string shaderCode;
 
@@ -428,11 +415,11 @@ void readFragmentShaders()
 
 		const rapidjson::Value& value = doc[i];
 
-		id = errorParsingJSONInt(value, fragment_s, id_s, i, path, GreaterEqualThan{ 0 }, i);
+		id = parseJSONInt(value, fragment_s, id_s, i, path, GreaterEqualThan{ 0 }, i);
 
-		name = errorParsingJSONString(value, fragment_s, name_s, i, path);
+		name = parseJSONString(value, fragment_s, name_s, i, path);
 
-		fileName = errorParsingJSONString(value, fragment_s, path_s, i, path);
+		fileName = parseJSONString(value, fragment_s, path_s, i, path);
 
 		std::string shaderCode;
 
@@ -482,15 +469,15 @@ void readShaders()
 
 		const rapidjson::Value& value = doc[i];
 
-		id = errorParsingJSONInt(value, shader_s, id_s, i, path, GreaterEqualThan{ 0 }, i);
+		id = parseJSONInt(value, shader_s, id_s, i, path, GreaterEqualThan{ 0 }, i);
 
-		name = errorParsingJSONString(value, shader_s, name_s, i, path);
+		name = parseJSONString(value, shader_s, name_s, i, path);
 
-		vertexID = errorParsingJSONInt(value, shader_s, vertex_s, i, path, GreaterEqualThan{ 0 }, -1);
+		vertexID = parseJSONInt(value, shader_s, vertex_s, i, path, GreaterEqualThan{ 0 }, -1);
 
-		geometryID = errorParsingJSONInt(value, shader_s, geometry_s, i, path, GreaterEqualThan{ -1 }, -1);
+		geometryID = parseJSONInt(value, shader_s, geometry_s, i, path, GreaterEqualThan{ -1 }, -1);
 
-		fragmentID = errorParsingJSONInt(value, shader_s, fragment_s, i, path, GreaterEqualThan{ 0 }, -1);
+		fragmentID = parseJSONInt(value, shader_s, fragment_s, i, path, GreaterEqualThan{ 0 }, -1);
 
 		//TODO Display message saying that one or two are missing
 		if (vertexID == -1 || fragmentID == -1) continue; //We skip the shader if vertex or fragment is missing
@@ -558,11 +545,11 @@ void readRenderers()
 
 		const rapidjson::Value& value = doc[i];
 
-		id = errorParsingJSONInt(value, texture_s, id_s, i, path, GreaterEqualThan{ 0 }, i);
+		id = parseJSONInt(value, texture_s, id_s, i, path, GreaterEqualThan{ 0 }, i);
 
-		name = errorParsingJSONString(value, texture_s, name_s, i, path);
+		name = parseJSONString(value, texture_s, name_s, i, path);
 
-		//fileName = errorParsingJSONString(value, texture_s, path_s, i, path);
+		//fileName = parseJSONString(value, texture_s, path_s, i, path);
 
 	}
 
@@ -595,11 +582,11 @@ void readTextures()
 
 		const rapidjson::Value& value = doc[i];
 
-		id = errorParsingJSONInt(value, texture_s, id_s, i, path, GreaterEqualThan{ 0 }, i);
+		id = parseJSONInt(value, texture_s, id_s, i, path, GreaterEqualThan{ 0 }, i);
 
-		name = errorParsingJSONString(value, texture_s, name_s, i, path);
+		name = parseJSONString(value, texture_s, name_s, i, path);
 
-		fileName = errorParsingJSONString(value, texture_s, path_s, i, path);
+		fileName = parseJSONString(value, texture_s, path_s, i, path);
 
 		readTexture(id, name, fileName);
 	}
@@ -629,11 +616,11 @@ void readMaterials()
 
 		const rapidjson::Value& mat = doc[i];
 
-		id = errorParsingJSONInt(mat, material_s, id_s, i, path, GreaterEqualThan{ 0 }, i);
+		id = parseJSONInt(mat, material_s, id_s, i, path, GreaterEqualThan{ 0 }, i);
 
-		name = errorParsingJSONString(mat, material_s, name_s, i, path);
+		name = parseJSONString(mat, material_s, name_s, i, path);
 
-		shaderID = errorParsingJSONInt(mat, material_s, shader_s, i, path, GreaterEqualThan{ 0 }, 0);
+		shaderID = parseJSONInt(mat, material_s, shader_s, i, path, GreaterEqualThan{ 0 }, 0);
 
 		new Material(id, name, Shader::shaders[shaderID]);
 	}
@@ -666,15 +653,15 @@ void readGameObjects()
 
 		const rapidjson::Value& value = doc[i];
 
-		id = errorParsingJSONInt(value, finalmodel_s, id_s, i, path, GreaterEqualThan{ 0 }, i);
+		id = parseJSONInt(value, finalmodel_s, id_s, i, path, GreaterEqualThan{ 0 }, i);
 
-		name = errorParsingJSONString(value, finalmodel_s, name_s, i, path);
+		name = parseJSONString(value, finalmodel_s, name_s, i, path);
 
-		posX = errorParsingJSONFloat(value, finalmodel_s, rawmodel_s, i, path, GreaterEqualThan{ 0 }, 0);
+		posX = parseJSONFloat(value, finalmodel_s, rawmodel_s, i, path, GreaterEqualThan{ 0 }, 0);
 
-		//texture = errorParsingJSONInt(value, finalmodel_s, texture_s, i, path, 0, GreaterEqualThan{ 0 });
+		//texture = parseJSONInt(value, finalmodel_s, texture_s, i, path, 0, GreaterEqualThan{ 0 });
 
-		//material = errorParsingJSONInt(value, finalmodel_s, material_s, i, path, 0, GreaterEqualThan{ 0 });
+		//material = parseJSONInt(value, finalmodel_s, material_s, i, path, 0, GreaterEqualThan{ 0 });
 
 		GameObject* gameObject = new GameObject(id, name);
 		Transform transform = gameObject->transform;

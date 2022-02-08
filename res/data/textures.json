@@ -1,16 +1,13 @@
 [
 	{
-		  "id": 0,
 		"name": "error",
 		"path": "error.png"
 	},
 	{
-		  "id": 1,
 		"name": "chick",
 		"path": "chick.png"
 	},
 	{
-		  "id": 2,
 		"name": "chr_knight",
 		"path": "chr_knight.png"
 	}

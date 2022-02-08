@@ -1468,12 +1468,6 @@
     <None Include="include\glm\gtc\ulp.inl">
       <Filter>Header Files\glm</Filter>
     </None>
-    <None Include="res\data\aabbs.json">
-      <Filter>Resource Files\data</Filter>
-    </None>
-    <None Include="res\data\blocks.json">
-      <Filter>Resource Files\data</Filter>
-    </None>
     <None Include="res\data\errors.json">
       <Filter>Resource Files\data</Filter>
     </None>

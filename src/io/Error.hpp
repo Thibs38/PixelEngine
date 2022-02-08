@@ -8,6 +8,8 @@
 
 #include <vector>
 
+
+//FIXME Change these to inline constexpr and CAPS
 namespace naming //OPTI Do not keep these in memory, they are only needed on loading
 {
 	extern const char* id_s;
@@ -22,7 +24,7 @@ namespace naming //OPTI Do not keep these in memory, they are only needed on loa
 
 	extern const char* error_s;
 
-	extern const char* int_s;
+	inline const std::string int_s = "Int";
 	extern const char* string_s;
 	extern const char* float_s;
 	extern const char* array_s;

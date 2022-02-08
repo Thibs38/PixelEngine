@@ -1,26 +1,23 @@
 [
 	{
-		            "id": 0,
 		          "name": "entityShader",
-		        "vertex": 0,
-		      "geometry": -1,
-		      "fragment": 0,
+		        "vertex": "objectVertex",
+		      "geometry": "",
+		      "fragment": "objectFragment",
 		   "attribcount": 3
 	},
 	{
-		            "id": 1,
 		          "name": "terrainShader",
-		        "vertex": 1,
-		      "geometry": -1,
-		      "fragment": 1,
+		        "vertex": "terrainVertex",
+		      "geometry": "",
+		      "fragment": "terrainFragment",
 		   "attribcount": 3
 	},
 	{
-		            "id": 2,
 		          "name": "lineShader",
-		        "vertex": 2,
-		      "geometry": -1,
-		      "fragment": 2,
+		        "vertex": "lineVertex",
+		      "geometry": "",
+		      "fragment": "lineFragment",
 		   "attribcount": 1
 	}
 ]

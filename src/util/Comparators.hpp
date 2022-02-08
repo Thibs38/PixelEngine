@@ -39,8 +39,7 @@ struct IComparator
 template<typename T>
 struct Always : public IComparator<T>
 {
-	Always(){}
-	const bool compare() const override { return true; }
+	const bool compare(T a) const override { return true; }
 	const std::string printMessage() const override { return ""; }
 };
 

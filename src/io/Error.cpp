@@ -16,7 +16,6 @@ namespace naming //OPTI Do not keep these in memory, they are only needed on loa
 
 	extern const char* error_s   = "ERROR";      
 
-	extern const char* int_s    = "Int";
 	extern const char* string_s = "String";
 	extern const char* float_s  = "Float";
 	extern const char* array_s  = "Array";

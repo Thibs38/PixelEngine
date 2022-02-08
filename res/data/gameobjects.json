@@ -1,6 +1,5 @@
 [
 	{
-		      "id": 0,
 		    "name": "smiley",
 		"position": {
 					"x": 0,
@@ -12,7 +11,6 @@
 
 	},
 	{
-		      "id": 1,
 		    "name": "heart",
 		"position": {
 					"x": 1,

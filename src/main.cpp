@@ -11,24 +11,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	glViewport(0, 0, width, height);
 }
 
-template <typename ...T>
-struct A {
-	virtual A(T...) = 0;
-};
-
-template <typename T>
-struct B : public A {
-	B() override : 
-};
-
-template <typename ...T>
-void test(const A<T...>& a) {
-
-}
-
-void callTest() {
-	test(const A{ 0 });
-}
+//TODO Add textures, gameobjects and components correctly to JSON
 
 int main() {
 
