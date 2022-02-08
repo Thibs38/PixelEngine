@@ -75,7 +75,9 @@ bool errorParsingJSON(rapidjson::Document& doc, constring data, constring path, 
 template<class T>
 inline std::string defaultValueFormat(T defaultValue) { return fmt::format("{} will be used as a default value", defaultValue);  }
 
-//TODO Rewrite documentation for the next 3 functions
+//TODO Rewrite documentation for the next 4 functions and change there names
+
+float 
 
 /// <summary>
 /// Detects if the value exists, if it is a float and if it is in the correct range.
@@ -91,8 +93,8 @@ inline std::string defaultValueFormat(T defaultValue) { return fmt::format("{} w
 /// <param name="comparator">The comparator used for the range of the value.</param>
 /// <param name="...comparands">The comparands used by the comparator.</param>
 /// <returns>The value if no errors, the default value otherwise.</returns>
-template<class ...T>
-auto errorParsingJSONFloat (const rapidjson::Value& value, const char* object, const char* member, int index, constring path, const IComparator<T...>& comparator = Always<T...>(), float defaultValue = 0)
+template<class T>
+float errorParsingJSONFloat (const rapidjson::Value& value, const char* object, const char* member, int index, constring path, const IComparator<T>& comparator = Always<T>(), float defaultValue = 0)
 {
 	if (!value.HasMember(member))
 	{
@@ -117,7 +119,7 @@ auto errorParsingJSONFloat (const rapidjson::Value& value, const char* object, c
 			formatJSONErrorArray(object, index), member, comparator.printMessage());
 		return defaultValue;
 	}
-	return value[member].GetFloat();
+	return v;
 	
 	
 }
@@ -136,8 +138,8 @@ auto errorParsingJSONFloat (const rapidjson::Value& value, const char* object, c
 /// <param name="comparator">The comparator used for the range of the value.</param>
 /// <param name="...comparands">The comparands used by the comparator.</param>
 /// <returns>The value if no errors, the default value otherwise.</returns>
-template<class ...T>
-auto errorParsingJSONInt   (const rapidjson::Value& value, const char* object, const char* member, int index, constring path, const IComparator<T...>& comparator = Always<T...>(), int defaultValue = 0)
+template<class T>
+int errorParsingJSONInt   (const rapidjson::Value& value, const char* object, const char* member, int index, constring path, const IComparator<T>& comparator = Always<T>(), int defaultValue = 0)
 {
 	if (!value.HasMember(member))
 	{
@@ -148,7 +150,7 @@ auto errorParsingJSONInt   (const rapidjson::Value& value, const char* object, c
 
 	if (!value[member].IsInt())
 	{
-		ErrorManager::printJSONError(JSONError::WRONG_TYPE, path, defaultValueFormat(defaultValue),
+		ErrorManager::printJSONError(JSONError::WRONG_TYPE, path, defaultValueFormat("\""+defaultValue+"\""),
 			formatJSONErrorArray(object, index), member, int_s);
 		return defaultValue;
 	}
@@ -156,7 +158,7 @@ auto errorParsingJSONInt   (const rapidjson::Value& value, const char* object, c
 	int v = value[member].GetInt();
 	if (!comparator.compare(v))
 	{
-		ErrorManager::printJSONError(JSONError::WRONG_VALUE, path, defaultValueFormat(defaultValue),
+		ErrorManager::printJSONError(JSONError::WRONG_VALUE, path, defaultValueFormat("\""+defaultValue+"\""),
 			formatJSONErrorArray(object, index), member, comparator.printMessage());
 		return defaultValue;
 	}
@@ -176,8 +178,8 @@ auto errorParsingJSONInt   (const rapidjson::Value& value, const char* object, c
 /// <param name="index">The index of the current object.</param>
 /// <param name="path">The path of the file.</param>
 /// <returns>The value if no errors, "ERROR" otherwise.</returns>
-template<class ...T>
-auto errorParsingJSONString(const rapidjson::Value& value, const char* object, const char* member, int index, constring path, const IComparator<T...>& comparator = Always<T...>(), const std::string &defaultValue = "ERROR")
+template <typename T>
+std::string errorParsingJSONString(const rapidjson::Value& value, const char* object, const char* member, int index, constring path, const IComparator<std::string>& comparator = Always<T>(), const std::string &defaultValue = "ERROR")
 {
 	if (!value.HasMember(member))
 	{
@@ -192,8 +194,15 @@ auto errorParsingJSONString(const rapidjson::Value& value, const char* object, c
 			formatJSONErrorArray(object, index), member, int_s);
 		return defaultValue;
 	}
+	std::string s = value[member].GetString();
+	if (!comparator.compare(s))
+	{
+		ErrorManager::printJSONError(JSONError::WRONG_VALUE, path, defaultValueFormat(defaultValue),
+			formatJSONErrorArray(object, index), member, comparator.printMessage());
+		return defaultValue;
+	}
 
-	return value[member].GetString();
+	return ;
 }
 
 #pragma endregion

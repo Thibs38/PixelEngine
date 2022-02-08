@@ -19,7 +19,7 @@
 /// Interface for Comparators, classes that are used to compare values.
 /// </summary>
 /// <typeparam name="...T"> Any type</typeparam>
-template<typename ...T>
+template<typename T>
 struct IComparator
 {	
 	/// <summary>
